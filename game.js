@@ -1,7 +1,8 @@
 const V_LEN = 12;
 const H_LEN = 10;
 const HEADER_SIZE = 40;
-const BLOCK_SIZE = Math.floor(((window.innerHeight-HEADER_SIZE)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-HEADER_SIZE)/V_LEN : window.innerWidth/H_LEN);
+const FOOTER_SIZE = 40;
+const BLOCK_SIZE = -3 + Math.floor(((window.innerHeight-HEADER_SIZE-FOOTER_SIZE)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-HEADER_SIZE-FOOTER_SIZE)/V_LEN : window.innerWidth/H_LEN);
 
 const EMPTY = 0;
 const WALL  = 1;
@@ -30,7 +31,14 @@ const color_list = [
   "#808"
 ];
 
+function handle(event) {
+    event.preventDefault();
+}
+
 window.onload = function() {
+  //document.documentElement.requestFullscreen();
+  document.addEventListener("mousewheel", handle, { passive: false });
+  document.addEventListener("touchmove", handle, { passive: false });
   let main = new Main();
   document.onkeydown = function(e){main.onkeydown(e.key)};
   setInterval(function(){main.interval()}, 1000);
@@ -68,8 +76,8 @@ class Main {
 
   init() {
     this.canvas = document.getElementById("main-canvas");
-    this.canvas.width  = H_LEN*BLOCK_SIZE;
-    this.canvas.height = V_LEN*BLOCK_SIZE + HEADER_SIZE;
+    this.canvas.width  = BLOCK_SIZE*H_LEN;
+    this.canvas.height = BLOCK_SIZE*V_LEN + HEADER_SIZE + FOOTER_SIZE;
     this.ctx = this.canvas.getContext("2d");
     this.state = new State();
   }
@@ -140,15 +148,22 @@ class Main {
 
   draw_all() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.font = '20px bold';   
+
+    this.ctx.fillStyle = "#FFF";
+    this.ctx.fillRect(0, 0, this.canvas.width, HEADER_SIZE);
+
+    this.ctx.font = '20px bold';
     this.ctx.fillStyle = "#000";
     this.ctx.fillText("SCORE:" + this.state.score, BLOCK_SIZE, HEADER_SIZE/2);
     this.ctx.fillText("PREV:"  + this.state.prev_score, BLOCK_SIZE*4, HEADER_SIZE/2);
     this.ctx.fillText("HIGH:"  + this.state.high_score, BLOCK_SIZE*7, HEADER_SIZE/2);
     this.draw_board();
+
+    this.ctx.fillStyle = "#FFF";
+    this.ctx.fillRect(0, HEADER_SIZE+BLOCK_SIZE*V_LEN, this.canvas.width, FOOTER_SIZE);
   }
 }
-  
+
 function key_down(state) {
   if (is_hit(state, state.y+1, state.x)) {
     state = insert_mino_to_board(state);
