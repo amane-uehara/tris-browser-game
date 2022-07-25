@@ -33,6 +33,7 @@ window.onload = function() {
   let main = new Main();
   document.onkeydown = function(e){main.onkeydown(e.key)};
   setInterval(function(){main.interval()}, 1000);
+  main.mainCanvas.addEventListener('mousedown', function(e){main.touch(e)});
 }
 
 class State {
@@ -52,8 +53,9 @@ class State {
     this.y = 1;
     this.x = V_LEN/2-2;
     this.id = 0;
-    this.score = 0;
+    this.score = 1;
     this.prev_score = 0;
+    this.high_score = 0;
   }
 }
 
@@ -74,18 +76,41 @@ class Main {
 
   onkeydown(e) {
     switch (e) {
-      case "h": this.state = key_left(this.state);  break;
-      case "k": this.state = key_up(this.state);    break;
-      case "l": this.state = key_right(this.state); break;
-      case "j": this.state = key_down(this.state);  break;
-      case " ": this.state = key_space(this.state); break;
+      case "ArrowLeft":
+      case "z":
+        this.state = key_left(this.state);
+        break;
+
+      case "ArrowRight":
+      case "c":
+        this.state = key_right(this.state);
+        break;
+
+      case "ArrowDown":
+      case "x":
+        this.state = key_down(this.state);
+        break;
+
+      case " ":               
+        this.state = key_space(this.state);
+        break;
     }
     this.draw_all();
   }
 
+  touch(e) {
+    let y = e.clientY;
+    let x = e.clientX;
+    let label = "";
+    if      (x < BLOCK_SIZE*3)         label = "ArrowLeft";
+    else if (x > BLOCK_SIZE*(H_LEN-3)) label = "ArrowRight";
+    else if (y > BLOCK_SIZE*(V_LEN-3)) label = "ArrowDown";
+    this.onkeydown(label);
+  };
+
   interval() {
     this.state = key_down(this.state);
-    this.draw_board();
+    this.draw_all();
   }
 
   draw_block(y,x,color) {
@@ -114,16 +139,12 @@ class Main {
   }
 
   draw_all() {
+    let info = "SCORE:" + this.state.score + " PREV:" + this.state.prev_score + " HIGH:" + this.state.high_score;
+    document.getElementById("score").innerHTML = info;
     this.draw_board();
-    document.getElementById("score").innerHTML = "score: " + this.state.score;
-    document.getElementById("prev-score").innerHTML = "prev-score: " + this.state.prev_score;
   }
 }
   
-function key_up(state) {
-  return state;
-}
-
 function key_down(state) {
   if (is_hit(state, state.y+1, state.x)) {
     state = insert_mino_to_board(state);
@@ -149,12 +170,7 @@ function key_right(state) {
 }
 
 function key_space(state) {
-  for (let delta=0; delta<V_LEN; delta++) {
-    if (is_hit(state, state.y+delta, state.x)) {
-      state.y = state.y + delta - 1;
-      break;
-    }
-  }
+  while (!is_hit(state, state.y+1, state.x)) state.y++;
   return state;
 }
 
@@ -213,10 +229,12 @@ function prepare_new_mino(state) {
   state.y  = 1;
   state.x  = V_LEN/2-2;
   state.id = Math.floor(Math.random() * 4);
+  state.score++;
 
   if (is_hit(state, state.y, state.x)) {
+    if (state.score > state.high_score) state.high_score = state.score;
     state.prev_score = state.score;
-    state.score = 0;
+    state.score = 1;
 
     for (let v=1; v<V_LEN-1; v++) {
       for (let h=1; h<H_LEN-1; h++) {
