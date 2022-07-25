@@ -1,6 +1,7 @@
 const V_LEN = 12;
 const H_LEN = 10;
-const BLOCK_SIZE = Math.floor(((window.innerHeight-40)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-40)/V_LEN : window.innerWidth/H_LEN);
+const HEADER_SIZE = 40;
+const BLOCK_SIZE = Math.floor(((window.innerHeight-HEADER_SIZE)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-HEADER_SIZE)/V_LEN : window.innerWidth/H_LEN);
 
 const EMPTY = 0;
 const WALL  = 1;
@@ -33,7 +34,7 @@ window.onload = function() {
   let main = new Main();
   document.onkeydown = function(e){main.onkeydown(e.key)};
   setInterval(function(){main.interval()}, 1000);
-  main.mainCanvas.addEventListener('mousedown', function(e){main.touch(e)});
+  main.canvas.addEventListener('mousedown', function(e){main.touch(e)});
 }
 
 class State {
@@ -66,11 +67,10 @@ class Main {
   }
 
   init() {
-    this.mainCanvas = document.getElementById("main-canvas");
-    this.mainCtx = this.mainCanvas.getContext("2d");
-    this.mainCanvas.width  = H_LEN*BLOCK_SIZE;
-    this.mainCanvas.height = V_LEN*BLOCK_SIZE;
-    this.mainCanvas.style.border = "1px solid #000";
+    this.canvas = document.getElementById("main-canvas");
+    this.canvas.width  = H_LEN*BLOCK_SIZE;
+    this.canvas.height = V_LEN*BLOCK_SIZE + HEADER_SIZE;
+    this.ctx = this.canvas.getContext("2d");
     this.state = new State();
   }
 
@@ -114,10 +114,10 @@ class Main {
   }
 
   draw_block(y,x,color) {
-    let py = y * BLOCK_SIZE;
+    let py = y * BLOCK_SIZE + HEADER_SIZE;
     let px = x * BLOCK_SIZE;
-    this.mainCtx.fillStyle = color_list[color];
-    this.mainCtx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+    this.ctx.fillStyle = color_list[color];
+    this.ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
   }
 
   draw_board() {
@@ -139,8 +139,12 @@ class Main {
   }
 
   draw_all() {
-    let info = "SCORE:" + this.state.score + " PREV:" + this.state.prev_score + " HIGH:" + this.state.high_score;
-    document.getElementById("score").innerHTML = info;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.font = '20px bold';   
+    this.ctx.fillStyle = "#000";
+    this.ctx.fillText("SCORE:" + this.state.score, BLOCK_SIZE, HEADER_SIZE/2);
+    this.ctx.fillText("PREV:"  + this.state.prev_score, BLOCK_SIZE*4, HEADER_SIZE/2);
+    this.ctx.fillText("HIGH:"  + this.state.high_score, BLOCK_SIZE*7, HEADER_SIZE/2);
     this.draw_board();
   }
 }
