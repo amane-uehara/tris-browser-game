@@ -1,6 +1,6 @@
-const BLOCK_SIZE = 40;
 const V_LEN = 12;
 const H_LEN = 10;
+const BLOCK_SIZE = Math.floor(((window.innerHeight-40)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-40)/V_LEN : window.innerWidth/H_LEN);
 
 const EMPTY = 0;
 const WALL  = 1;
