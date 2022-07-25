@@ -2,7 +2,7 @@ const V_LEN = 12;
 const H_LEN = 10;
 const HEADER_SIZE = 40;
 const FOOTER_SIZE = 40;
-const BLOCK_SIZE = -10 + Math.floor(((window.innerHeight-HEADER_SIZE-FOOTER_SIZE)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-HEADER_SIZE-FOOTER_SIZE)/V_LEN : window.innerWidth/H_LEN);
+const BLOCK_SIZE = -3 + Math.floor(((window.innerHeight-HEADER_SIZE-FOOTER_SIZE)/V_LEN < window.innerWidth/H_LEN) ? (window.innerHeight-HEADER_SIZE-FOOTER_SIZE)/V_LEN : window.innerWidth/H_LEN);
 
 const EMPTY = 0;
 const WALL  = 1;
